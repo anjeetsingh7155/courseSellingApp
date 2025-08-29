@@ -13,7 +13,7 @@ const user = new Schema({
 });
 
 const admin = new Schema({
-  userName: String,
+  adminName: String,
   email: { type: String, unique: true },
   password: { type: String, unique: true },
   mobileNo: Number,

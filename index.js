@@ -6,7 +6,7 @@ const port = 9000;
 const {userRouter} = require('./routes/user')
 const {courseRouter} = require('./routes/course')
 const {adminRouter} = require('./routes/admin')
-const dotenv = require("dotenv")  // Agar ES Modules use kar rahe ho
+const dotenv = require("dotenv")
 dotenv.config();  // env variables ko process.env me load karega
 const dbURL = process.env.databaseURL
 
@@ -25,7 +25,6 @@ databaseConnection().then((e) => {
 
 //this is to remove the cors error
 app.use(cors());
-
 app.use(express.json());
 
 //these are the middlewares to get the user ,course , admin end point

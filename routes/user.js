@@ -3,8 +3,8 @@ const userRouter = Router();
 const z = require("zod");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const {userModel,adminModel}= require("../db")
-const {jwt_password,auth} = require("../auth")
+const {userModel}= require("../db")
+const {jwt_userPass,userAuth} = require("../middlewares/userAuth")
 
 userRouter.post("/signup", async (req, res) => {
   try{
@@ -42,31 +42,45 @@ userRouter.post("/signup", async (req, res) => {
 });
 
 userRouter.post("/login", async (req, res) => {
-  try{
-  const {userName,password,email} = req.body
+  try {
+    const { userName, password, email } = req.body;
 
-const user= await userModel.findOne({
-  userName : userName,
-  email : email
-})
-const passwordMatch = bcrypt.compare(password,user.password)
-if(user && passwordMatch){
-  const token = jwt.sign({
-    userName : user.userName,
-    id : user._id
-  },jwt_password)
+    const user = await userModel.findOne({
+      userName: userName,
+      email: email,
+    });
 
-  res.json({
-    token : token
-  })
-}
-  }catch(e){
-    res.sendStatus(404).json({message:`user not found :${e.message}`})
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
+    const token = jwt.sign(
+      {
+        userName: user.userName,
+        id: user._id, // Ensure `id` is included
+      },
+      jwt_userPass
+    );
+
+    res.json({
+      token: token,
+    });
+  } catch (e) {
+    res.status(500).json({ message: `An error occurred: ${e.message}` });
   }
 });
 
-userRouter.get("/purchases",auth, (req, res) => {
-  res.send("hello world");
+userRouter.get("/purchases",userAuth, (req, res) => {
+  const id = req.adminID
+  const userName =  req.userName
+  res.json({
+    id: id,
+    userName:userName
+  })
 });
 
 module.exports = {
