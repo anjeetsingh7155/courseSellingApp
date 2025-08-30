@@ -3,7 +3,7 @@ const userRouter = Router();
 const z = require("zod");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const {userModel}= require("../db")
+const {userModel, purchasesModel, courseModel}= require("../db")
 const {jwt_userPass,userAuth} = require("../middlewares/userAuth")
 
 userRouter.post("/signup", async (req, res) => {
@@ -74,13 +74,24 @@ userRouter.post("/login", async (req, res) => {
   }
 });
 
-userRouter.get("/purchases",userAuth, (req, res) => {
-  const id = req.adminID
-  const userName =  req.userName
-  res.json({
-    id: id,
-    userName:userName
-  })
+userRouter.get("/purchases",userAuth, async (req, res) => {
+  try{
+ const userID = req.userID
+ const purchases = await purchasesModel.find({
+  userID: userID,
+ })
+ const courseData = await courseModel.find({
+  _id : {$in : purchases.map(x => x.courseID) }
+ })
+ res.sendStatus(200).json({
+  purchases : purchases,
+ })
+}catch(e){
+   res.sendStatus(201).json({
+    message : "No content"
+   })
+}
+
 });
 
 module.exports = {
