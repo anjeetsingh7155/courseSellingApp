@@ -7,7 +7,7 @@ async function userAuth(req,res,next){
 const token = await req.headers.token
     try {
         const decoded_Data = jwt.verify(token , jwt_userPass);
-        req.adminID = decoded_Data.id;
+        req.userID = decoded_Data.id;
         req.userName = decoded_Data.userName;
         next();
     } catch (e) {
